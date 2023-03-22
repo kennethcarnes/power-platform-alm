@@ -1,5 +1,5 @@
 name: release-solution-to-prod-with-inputs
-# Reusable workflow
+## Reusable workflow
 # convert solution to managed (using a build PowerPlatform environment for the conversion)
 # upload the solution to the GitHub artifacts and deploy to the PROD environment
 on:
