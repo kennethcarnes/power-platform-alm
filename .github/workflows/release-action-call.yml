@@ -1,5 +1,5 @@
-name: Release action
-# Call the reusable workflow release-solution-with-inputs.yml
+name: release-action-call
+# Call the reusable workflow release-solution-to-prod-with-inputs.yml
 # Release your solution to prod when you create a new release.
 
 on:
@@ -9,10 +9,10 @@ permissions:
   contents: write
 jobs:
   Release-solution-ALMLab:
-    uses: ./.github/workflows/release-solution-with-inputs.yml
+    uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
     with:
       #You can specify the solution name here
-      solution_name: ALMLab
+      solution_name: ActiveTimeOffRequests
       #Update your values here
       BUILD_ENVIRONMENT_URL: https://orga6609542.crm.dynamics.com/
       PRODUCTION_ENVIRONMENT_URL: https://org0fdb3ab7.crm.dynamics.com/
