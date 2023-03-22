@@ -8,8 +8,8 @@ on:
 permissions:
   contents: write
 jobs:
-  Release-solution-ALMLab:
-    uses: .github/workflows/release-solution-with-inputs.yml
+  Release-solution-ActiveTimeOffRequests:
+    uses: ./.github/workflows/release-solution-with-inputs.yml
     with:
       #You can specify the solution name here
       solution_name: ALMLab
