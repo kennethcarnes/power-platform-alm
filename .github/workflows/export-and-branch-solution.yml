@@ -7,27 +7,27 @@ on:
     inputs:
       # Change this value
       solution_name:
-        description: 'name of the solution to worked on from Power Platform'
+        description: "name of the solution to worked on from Power Platform"
         required: true
         default: ActiveTimeOffRequests
-       #Do Not change these values
+        #Do Not change these values
       solution_exported_folder:
-        description: 'folder name for staging the exported solution *do not change*'
+        description: "folder name for staging the exported solution *do not change*"
         required: true
         default: out/exported/
       solution_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: "staging the unpacked solution folder before check-in *do not change*"
         required: true
         default: out/solutions/
-      solution_target_folder: 
-       description: 'folder name to be created and checked in *do not change*'
-       required: true
-       default: solutions/
+      solution_target_folder:
+        description: "folder name to be created and checked in *do not change*"
+        required: true
+        default: solutions/
 env:
-#edit your values here
-  ENVIRONMENT_URL: 'https://orgf18c5356.crm.dynamics.com'
-  CLIENT_ID: 'bb29eb9b-f127-405d-a4ef-7085d3ceafdc'
-  TENANT_ID: '55b09ad1-dbc4-4fd0-89ce-2735b3e110d7'
+  #edit your values here
+  ENVIRONMENT_URL: "https://orgf18c5356.crm.dynamics.com"
+  CLIENT_ID: "bb29eb9b-f127-405d-a4ef-7085d3ceafdc"
+  TENANT_ID: "55b09ad1-dbc4-4fd0-89ce-2735b3e110d7"
 permissions:
   contents: write
 jobs:
@@ -38,41 +38,40 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
 
-    - name: who-am-i action
-      uses: microsoft/powerplatform-actions/who-am-i@v0
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
+      - name: who-am-i action
+        uses: microsoft/powerplatform-actions/who-am-i@v0
+        with:
+          environment-url: ${{env.ENVIRONMENT_URL}}
+          app-id: ${{env.CLIENT_ID}}
+          client-secret: ${{ secrets.PowerPlatformSPN }}
+          tenant-id: ${{env.TENANT_ID}}
 
+      - name: export-solution action
+        uses: microsoft/powerplatform-actions/export-solution@v0
+        with:
+          environment-url: ${{env.ENVIRONMENT_URL}}
+          app-id: ${{env.CLIENT_ID}}
+          client-secret: ${{ secrets.PowerPlatformSPN }}
+          tenant-id: ${{env.TENANT_ID}}
+          solution-name: ${{ github.event.inputs.solution_name }}
+          solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
 
-    - name: export-solution action
-      uses: microsoft/powerplatform-actions/export-solution@v0
-      with:
-        environment-url: ${{env.ENVIRONMENT_URL}}
-        app-id: ${{env.CLIENT_ID}}
-        client-secret: ${{ secrets.PowerPlatformSPN }}
-        tenant-id: ${{env.TENANT_ID}}
-        solution-name: ${{ github.event.inputs.solution_name }}
-        solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
+      - name: unpack-solution action
+        uses: microsoft/powerplatform-actions/unpack-solution@v0
+        with:
+          solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
+          solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
+          solution-type: "Unmanaged"
+          overwrite-files: true
 
-    - name: unpack-solution action
-      uses: microsoft/powerplatform-actions/unpack-solution@v0
-      with:
-        solution-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-        solution-type: 'Unmanaged'
-        overwrite-files: true
-
-    - name: branch-solution, prepare it for a PullRequest
-      uses: microsoft/powerplatform-actions/branch-solution@v0
-      with:
-        solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
-        solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        allow-empty-commit: true
+      - name: branch-solution, prepare it for a PullRequest
+        uses: microsoft/powerplatform-actions/branch-solution@v0
+        with:
+          solution-folder: ${{ github.event.inputs.solution_folder}}/${{ github.event.inputs.solution_name }}
+          solution-target-folder: ${{ github.event.inputs.solution_target_folder}}/${{ github.event.inputs.solution_name }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-empty-commit: true
