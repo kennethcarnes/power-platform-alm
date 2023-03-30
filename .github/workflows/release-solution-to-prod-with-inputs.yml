@@ -27,7 +27,7 @@ on:
       solution_release_folder:
        description: 'folder where the released binaries are going to be hosted *do not change*'
        type: string
-       default: out/release
+       default: out/release/
       BUILD_ENVIRONMENT_URL:
         description: 'Build environment url.'
         type: string
@@ -111,7 +111,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_release_folder}}/
+        path: ${{ inputs.solution_release_folder}}
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
