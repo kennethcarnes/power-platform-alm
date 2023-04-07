@@ -1,22 +1,32 @@
 name: release-action-call
-## Call the reusable workflow release-solution-to-prod-with-inputs.yml
-### Release your solution to prod when you create a new release.
 
+### Release your solution to prod when you create a new release.
+## Call the reusable workflow release-solution-to-prod-with-inputs.yml
+
+# Define the event that triggers this workflow - in this case, it is triggered when a new release is created
 on:
   release:
     types: [created]
+    
+# Define the permissions this workflow needs
 permissions:
   contents: write
+  
+# Define the jobs for the workflow
 jobs:
+  # Define the name of the job
   Release-solution-ActiveTimeOffRequests:
+    # Define the workflow file to use
     uses: ./.github/workflows/release-solution-to-prod-with-inputs.yml
+    # Define inputs for the workflow
     with:
-      #You can specify the solution name here
+      # Specify the name of the solution to release
       solution_name: ActiveTimeOffRequests
-      #Update your values here
+      # Specify values to be used by the workflow
       BUILD_ENVIRONMENT_URL: https://orga6609542.crm.dynamics.com/
       PRODUCTION_ENVIRONMENT_URL: https://org0fdb3ab7.crm.dynamics.com/
       CLIENT_ID: bb29eb9b-f127-405d-a4ef-7085d3ceafdc
       TENANT_ID: 55b09ad1-dbc4-4fd0-89ce-2735b3e110d7
+    # Define secrets to be used by the workflow
     secrets:
       envSecret: ${{ secrets.PowerPlatformSPN }}
