@@ -1,10 +1,14 @@
 name: release-solution-to-prod-with-inputs
-## Reusable workflow
-# convert solution to managed (using a build PowerPlatform environment for the conversion)
-# upload the solution to the GitHub artifacts and deploy to the PROD environment
+## This workflow is designed to be reusable and performs the following tasks:
+# Use the BUILD environment to convert the solution from unmanaged to managed
+# Upload the managed solution to the GitHub artifacts
+# Deploy the solution to the PROD environment.
+
+# Define the workflow trigger
 on:
   workflow_call:
-    inputs: 
+   # Define the inputs for this workflow
+    inputs:
       #Do Not change these values
       #Values are set by the caller
       #caller sample: release-action-call.ymnl
@@ -49,6 +53,7 @@ on:
         description: 'The secret value for authentication using SPN'
         required: true
 
+# Define the jobs for the workflow.
 jobs:
   convert-to-managed:
     runs-on: windows-latest
@@ -56,11 +61,14 @@ jobs:
     env:
       RUNNER_DEBUG: 1
 
+    # Define the steps for this job
     steps:
+    # Checkout the source code
     - uses: actions/checkout@v2
       with:
         lfs: true
-
+        
+    # Pack the solution
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
@@ -68,7 +76,8 @@ jobs:
         solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
         solution-type: Unmanaged
 
-    - name: Import solution as unmanaged to build env
+    # Import solution as unmanaged to the BUILD environment
+    - name: Import solution as unmanaged to the BUILD environment
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
         environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
@@ -79,6 +88,7 @@ jobs:
         force-overwrite: true
         publish-changes: true
 
+    # Export the solution as managed to the BUILD environment
     - name: Export solution as managed
       uses: microsoft/powerplatform-actions/export-solution@v0
       with:
@@ -90,29 +100,35 @@ jobs:
         managed: true
         solution-output-file: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}.zip
 
-    - name: Upload the ready to ship solution to GH artifact store
+     # Upload the ready to ship solution to GitHub artifacts
+    - name: Upload the ready to ship solution to GitHub artifacts
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
         path: ${{ inputs.solution_shipping_folder}}/
 
+  #Deploy to PROD Environment
   release-to-staging:
     needs: [ convert-to-managed ]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
 
+    # Checkout the source code
     steps:
     - uses: actions/checkout@v2
       with:
         lfs: true
-
+        
+    # Download unmanaged solution from GitHub artifacts
     - name: Fetch the ready to ship solution from GH artifact store
       uses: actions/download-artifact@v2
       with:
         name: managedSolutions
         path: ${{ inputs.solution_release_folder}}
-    - name: Import solution to prod env
+        
+    # Import the managed solution to the PROD environment
+    - name: Import the managed solution to the PROD environment
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
         environment-url: ${{inputs.PRODUCTION_ENVIRONMENT_URL}}
