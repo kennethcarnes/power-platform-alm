@@ -4,9 +4,10 @@ name: export-and-branch-solution
 # This workflow exports a solution from the DEV environment, unpacks it, 
 # prepares it, commits it, and pushes a git branch with the changes.
 
-# Define the inputs for the workflow.
+# Define the workflow trigger
 on:
   workflow_dispatch:
+    # Define the inputs for the workflow.
     inputs:
       # The name of the solution in the DEV environment.
       solution_name:
