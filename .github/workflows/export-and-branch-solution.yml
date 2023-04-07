@@ -1,35 +1,49 @@
 name: export-and-branch-solution
-## Export solution from DEV environment
-#  unpack it and prepare, commit and push a git branch with the changes
 
+## Export solution from DEV environment
+# This workflow exports a solution from the DEV environment, unpacks it, 
+# prepares it, commits it, and pushes a git branch with the changes.
+
+# Define the inputs for the workflow.
 on:
   workflow_dispatch:
     inputs:
-      # Change this value
+      # The name of the solution in the DEV environment.
       solution_name:
-        description: "name of the solution to worked on from Power Platform"
+        description: "name of the solution in DEV environment"
         required: true
         default: ActiveTimeOffRequests
-        #Do Not change these values
+        
+      # The folder name for staging the exported solution. *Do not change.*
       solution_exported_folder:
         description: "folder name for staging the exported solution *do not change*"
         required: true
         default: out/exported/
+        
+      # The folder name for staging the unpacked solution folder before check-in *Do not change.*  
       solution_folder:
         description: "staging the unpacked solution folder before check-in *do not change*"
         required: true
         default: out/solutions/
+        
+      # The folder name to be created and checked in. *Do not change.*  
       solution_target_folder:
         description: "folder name to be created and checked in *do not change*"
         required: true
         default: solutions/
+        
+# Set the environment variables for the workflow.
 env:
-  #edit your values here
+  # Edit your values here.
   ENVIRONMENT_URL: "https://orgf18c5356.crm.dynamics.com"
   CLIENT_ID: "bb29eb9b-f127-405d-a4ef-7085d3ceafdc"
   TENANT_ID: "55b09ad1-dbc4-4fd0-89ce-2735b3e110d7"
+  
+# Set the permissions for the contents of the folders.
 permissions:
   contents: write
+  
+# Define the jobs for the workflow.
 jobs:
   export-from-dev:
     runs-on: windows-latest
@@ -38,10 +52,12 @@ jobs:
       RUNNER_DEBUG: 1
 
     steps:
+      # Check out the repository.
       - uses: actions/checkout@v2
         with:
           lfs: true
-
+          
+      # Check authentication for the DEV environment.
       - name: who-am-i action
         uses: microsoft/powerplatform-actions/who-am-i@v0
         with:
@@ -49,7 +65,8 @@ jobs:
           app-id: ${{env.CLIENT_ID}}
           client-secret: ${{ secrets.PowerPlatformSPN }}
           tenant-id: ${{env.TENANT_ID}}
-
+          
+      # Export the solution ZIP file from the DEV environment.
       - name: export-solution action
         uses: microsoft/powerplatform-actions/export-solution@v0
         with:
@@ -59,7 +76,8 @@ jobs:
           tenant-id: ${{env.TENANT_ID}}
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder}}/${{ github.event.inputs.solution_name }}.zip
-
+      
+      # Unpack the solution ZIP file.
       - name: unpack-solution action
         uses: microsoft/powerplatform-actions/unpack-solution@v0
         with:
@@ -68,6 +86,7 @@ jobs:
           solution-type: "Unmanaged"
           overwrite-files: true
 
+      # Create a new branch for the solution changes and commit them.
       - name: branch-solution, prepare it for a PullRequest
         uses: microsoft/powerplatform-actions/branch-solution@v0
         with:
